@@ -1,4 +1,4 @@
-const API = "http://localhost:3000/departamentos/";
+const API = "http://localhost:3000/departamento/";
 
 async function leerDepartamentos() {
   try {

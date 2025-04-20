@@ -83,6 +83,7 @@ CREATE TABLE [profesor] (
   [apellidoPaterno] VARCHAR(30) NOT NULL,
   [apellidoMaterno] VARCHAR(30) NOT NULL,
   [idDepartamento_departamento] INT NOT NULL,
+  [mailMaestro] VARCHAR(40) NOT NULL,
   PRIMARY KEY ([matriculaMaestro])
 );
 
