@@ -14,10 +14,10 @@ INSERT INTO [materia] ([clave], [nombreMateria], [idDepartamento_departamento]) 
 ('PHYS101', 'Fundamentals of Physics', 3);
 
 -- Insert into 'profesor'
-INSERT INTO [profesor] ([matriculaMaestro], [nombre], [apellidoPaterno], [apellidoMaterno], [idDepartamento_departamento], [mailMaestro]) VALUES
-('P001', 'John', 'Doe', 'Smith', 1, "p001@tec.mx"),
-('P002', 'Jane', 'Roe', 'Jones', 2, "p002@tec.mx"),
-('P003', 'Albert', 'Einstein', 'Fermi', 3, "p003@tec.mx");
+INSERT INTO [profesor] ([matriculaMaestro], [nombre], [apellidoPaterno], [apellidoMaterno], [idDepartamento_departamento], [mailMaestro], [contraHash]) VALUES
+('P001', 'John', 'Doe', 'Smith', 1, "p001@tec.mx", "$2b$12$WyAzQcOixcuh6pd4flWIHOnQ70EgWFMbZt4AWDTACbzYYSROYFoQC"),
+('P002', 'Jane', 'Roe', 'Jones', 2, "p002@tec.mx", "$2b$12$8ajmGq5Q4mazGHJqcZBqzenmE2NifEKHkF/HHVYnSh8mlbfqD2yx6"),
+('P003', 'Albert', 'Einstein', 'Fermi', 3, "p003@tec.mx", "$2b$12$8ajmGq5Q4mazGHJqcZBqzenmE2NifEKHkF/HHVYnSh8mlbfqD2yx6");
 
 -- Insert into 'periodoEscolar'
 INSERT INTO [periodoEscolar] ([idPeriodo], [fechaInicio], [fechaFin]) VALUES

@@ -19,7 +19,7 @@ router.post("/", async (req,res,) =>{
             "SELECT * FROM profesor WHERE mailMaestro = @mailMaestro"
         )
         if (result.recordset.length) {
-            res.send(result.recordset);
+            res.send(result.recordset[0].contraHash);
         } else {
             res.send("EL ID NO EXISTE");
         }
