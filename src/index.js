@@ -3,11 +3,17 @@ import bodyParser from "body-parser";
 import departamentos from "../routes/departamento.js";
 import alumnos from "../routes/alumno.js";
 import login from "../routes/login.js";
+import cors from 'cors';
 
 const app = express();
 const PUERTO = 3000;
 
 app.use(bodyParser.json());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true  //pa las cookies
+}));
+
 
 app.use("/departamento", departamentos);
 app.use("/alumno", alumnos);

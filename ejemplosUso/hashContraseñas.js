@@ -10,5 +10,10 @@ const ejemploContras = ["hola1234","contraSegura","tec2025!"];
 
 ejemploContras.forEach( async (contra) => {
     const hash = await bcrypt.hash(contra, 12);
-    console.log(hash)
+    // console.log(hash)
 });
+
+const hashString = async (string) => {
+    return await bcrypt.hash(string,12);
+}
+console.log(await hashString("contra"));
