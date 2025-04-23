@@ -1,61 +1,73 @@
+
 USE Highpoint;
 GO
 
--- Insert into 'departamento'
-INSERT INTO [departamento] ([idDepartamento], [nombreDepartamento]) VALUES
-(1, 'Mathematics'),
-(2, 'Computer Science'),
-(3, 'Physics');
+-- Departamentos
+INSERT INTO departamento (nombreDepartamento) VALUES
+('Ingeniería'),
+('Ciencias Sociales');
 
--- Insert into 'materia'
-INSERT INTO [materia] ([clave], [nombreMateria], [idDepartamento_departamento]) VALUES
-('MATH101', 'Calculus I', 1),
-('CS101', 'Introduction to Programming', 2),
-('PHYS101', 'Fundamentals of Physics', 3);
+-- Usuarios
+INSERT INTO usuario (correo, contraseñaHash) VALUES
+('admin@highpoint.edu', 'hash123admin'),
+('profe1@highpoint.edu', 'hash123profe1'),
+('alumno1@highpoint.edu', 'hash123alumno1');
 
--- Insert into 'profesor'
-INSERT INTO [profesor] ([matriculaMaestro], [nombre], [apellidoPaterno], [apellidoMaterno], [idDepartamento_departamento], [mailMaestro], [contraHash]) VALUES
-('P001', 'John', 'Doe', 'Smith', 1, "p001@tec.mx", "$2b$12$WyAzQcOixcuh6pd4flWIHOnQ70EgWFMbZt4AWDTACbzYYSROYFoQC"),
-('P002', 'Jane', 'Roe', 'Jones', 2, "p002@tec.mx", "$2b$12$8ajmGq5Q4mazGHJqcZBqzenmE2NifEKHkF/HHVYnSh8mlbfqD2yx6"),
-('P003', 'Albert', 'Einstein', 'Fermi', 3, "p003@tec.mx", "$2b$12$8ajmGq5Q4mazGHJqcZBqzenmE2NifEKHkF/HHVYnSh8mlbfqD2yx6");
+-- Roles
+INSERT INTO rol (rol) VALUES
+('Administrador'),
+('Profesor'),
+('Alumno');
 
--- Insert into 'periodoEscolar'
-INSERT INTO [periodoEscolar] ([idPeriodo], [fechaInicio], [fechaFin]) VALUES
-(1, '2023-09-01', '2023-12-15'),
-(2, '2024-01-10', '2024-05-20');
+-- Permisos
+INSERT INTO permiso (idUsuario_usuario, idRol_rol) VALUES
+(1, 1), -- admin
+(2, 2), -- profe
+(3, 3); -- alumno
 
--- Insert into 'grupo'
-INSERT INTO [grupo] ([crn], [idPeriodo_periodoEscolar], [matriculaMaestro_profesor], [clave_materia]) VALUES
-('G001', 1, 'P001', 'MATH101'),
-('G002', 1, 'P002', 'CS101'),
-('G003', 2, 'P003', 'PHYS101');
+-- Profesores
+INSERT INTO profesor (matriculaMaestro, nombre, apellidoPaterno, apellidoMaterno, idDepartamento_departamento) VALUES
+('P0001', 'Ana', 'López', 'García', 1),
+('P0002', 'Carlos', 'Ramírez', 'Díaz', 2);
 
--- Insert into 'alumno'
-INSERT INTO [alumno] ([matriculaAlumno], [nombre], [apellidoPaterno], [apellidoMaterno]) VALUES
-('A001', 'Carlos', 'Perez', 'Gomez'),
-('A002', 'Maria', 'Lopez', 'Martinez'),
-('A003', 'Luis', 'Garcia', 'Rodriguez');
+-- Periodos escolares
+INSERT INTO periodoEscolar (fechaInicio, fechaFin) VALUES
+('2025-01-15', '2025-06-15'),
+('2025-08-01', '2025-12-15');
 
--- Insert into 'inscrito'
-INSERT INTO [inscrito] ([crn_grupo], [matriculaAlumno_alumno]) VALUES
-('G001', 'A001'),
-('G002', 'A002'),
-('G003', 'A003');
+-- Materias
+INSERT INTO materia (clave, nombreMateria, idDepartamento_departamento) VALUES
+('MAT101', 'Álgebra', 1),
+('SOC201', 'Sociología', 2);
 
--- Insert into 'pregunta'
-INSERT INTO [pregunta] ([texto]) VALUES
-('What is the integral of x^2?'),
-('Explain the concept of Object-Oriented Programming.'),
-('What is the speed of light in a vacuum?');
+-- Grupos
+INSERT INTO grupo (crn, idPeriodo_periodoEscolar, matriculaMaestro_profesor, clave_materia) VALUES
+('G1001', 1, 'P0001', 'MAT101'),
+('G1002', 2, 'P0002', 'SOC201');
 
--- Insert into 'respuesta'
-INSERT INTO [respuesta] ([matriculaAlumno_alumno], [respuesta], [idPregunta_pregunta], [crn_grupo]) VALUES
-('A001', 3, 1, 'G001'),  -- Student A001 answered Question 1 in group G001
-('A002', 1, 2, 'G002'),  -- Student A002 answered Question 2 in group G002
-('A003', 2, 3, 'G003');  -- Student A003 answered Question 3 in group G003
+-- Alumnos
+INSERT INTO alumno (matriculaAlumno) VALUES
+('A0001'),
+('A0002');
 
--- Insert into 'comentario'
-INSERT INTO [comentario] ([crn], [comentario], [matriculaAlumno_alumno]) VALUES
-('G001', 'Great class! Really enjoyed the lectures.', 'A001'),
-('G002', 'The programming assignments are tough, but informative.', 'A002'),
-('G003', 'Physics is amazing, but the material is hard to understand.', 'A003');
+-- Inscritos
+INSERT INTO inscrito (crn_grupo, matriculaAlumno_alumno) VALUES
+('G1001', 'A0001'),
+('G1001', 'A0002'),
+('G1002', 'A0002');
+
+-- Preguntas
+INSERT INTO pregunta (texto) VALUES
+('¿Te gustó la clase?'),
+('¿Recomendarías al profesor?');
+
+-- Respuestas
+INSERT INTO respuesta (matriculaAlumno_alumno, respuesta, idPregunta_pregunta, crn_grupo) VALUES
+('A0001', 5, 1, 'G1001'),
+('A0002', 4, 1, 'G1001'),
+('A0002', 3, 2, 'G1002');
+
+-- Comentarios
+INSERT INTO comentario (crn, comentario, matriculaAlumno_alumno) VALUES
+('G1001', 'Muy buena clase, el profe explica bien.', 'A0001'),
+('G1002', 'Faltó profundidad en los temas.', 'A0002');
