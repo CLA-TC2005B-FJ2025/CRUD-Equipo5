@@ -5,37 +5,59 @@ import bcrypt from "bcrypt";
 
 const router = express.Router();
 
-router.post("/", async (req,res,) =>{
-    const {email, password} = req.body;
+router.post("/", async (req, res) => {
+  const { email, password, rol } = req.body;
+  try {
+    await sql.connect(DBconfig);
+    let transaction = new sql.Transaction();
+    await transaction.begin();
 
-    let transaction;
-    try{
-        //devolver de la base de datos el hash con la contraseña
-        await sql.connect(DBconfig);
-        transaction = new sql.Transaction();
-        await transaction.begin();
+    const request = new sql.Request(transaction);
+    request.input("correo", sql.VarChar, email);
+    const person = await request.query(
+      "SELECT * FROM usuario WHERE correo = @correo",
+    );
 
-        const request = new sql.Request(transaction);
-        request.input("mailMaestro", sql.VarChar, email);
-        const result = await request.query(
-            "SELECT * FROM profesor WHERE mailMaestro = @mailMaestro"
-        )
+    if (person.recordset.length) {
+      request.input(
+        "idForm",
+        sql.VarChar,
+        String(person.recordset[0].idUsuario),
+      );
+      request.input("rolForm", sql.Int, parseInt(rol));
 
-        //si llego algo de la base de datos(existe el usuario) comparar el hash con la contraseña dada
-        if (result.recordset.length) {
-            const response = bcrypt.compare(password, result.recordset[0].contraHash, (err, contra) => {
-                result ? res.send(contra) : res.send("contraseña incorrecta", err);
-            })
+      const match = await bcrypt.compare(
+        password,
+        person.recordset[0].contraseñaHash,
+      );
+      if (match) {
+        const permiso = await request.query(
+          "SELECT * FROM permiso WHERE idUsuario_usuario = @idForm AND idRol_rol = @rolForm",
+        );
+        if (permiso.recordset.length) {
+          console.log("Contraseña y permisos correctos");
+          res.send(true);
         } else {
-            res.send("EL ID NO EXISTE");
+          console.log(
+            "Contraseña correcta, pero no se cuentan con los permisos necesarios",
+          );
+          res.send(false);
         }
-        await transaction.commit();
-    } catch(err){
-        console.error(err);
-        await transaction.rollback();
-    } finally{
-        sql.close();
+      } else {
+        res.status(401).send("Credenciales inválidas");
+      }
+    } else {
+      res.status(401).send("Credenciales inválidas");
     }
-})
+
+    await transaction.commit();
+  } catch (err) {
+    console.error(err);
+    if (transaction) await transaction.rollback();
+    res.status(500).send("Error interno del servidor");
+  } finally {
+    sql.close();
+  }
+});
 
 export default router;

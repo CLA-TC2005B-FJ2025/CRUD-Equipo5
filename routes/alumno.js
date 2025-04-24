@@ -46,14 +46,14 @@ router.get("/:matriculaAlumno", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) =>{
+router.post("/", async (req, res) => {
   let transaccion;
-  try{
+  try {
     await sql.connect(DBconfig);
     const nuevoAlumno = req.body;
     res.send(
-      `Agregando al alumno: ${nuevoAlumno.nombre} ${nuevoAlumno.apellidoPaterno}, con matrícula: ${nuevoAlumno.matriculaAlumno}`
-    )
+      `Agregando al alumno: ${nuevoAlumno.nombre} ${nuevoAlumno.apellidoPaterno}, con matrícula: ${nuevoAlumno.matriculaAlumno}`,
+    );
     transaccion = new sql.Transaction();
     await transaccion.begin();
 
@@ -67,13 +67,13 @@ router.post("/", async (req, res) =>{
       "INSERT INTO alumno (matriculaAlumno, nombre, apellidoPaterno, apellidoMaterno) VALUES (@matriculaAlumno, @nombre, @apellidoPaterno, @apellidoMaterno)",
     );
     await transaccion.commit();
-    console.log("Alumno agregado exitosamente")
-  } catch(err){
-    console.error(err)
-    if(transaccion){
+    console.log("Alumno agregado exitosamente");
+  } catch (err) {
+    console.error(err);
+    if (transaccion) {
       transaccion.rollback();
     }
-  } finally{
+  } finally {
     sql.close();
   }
 });

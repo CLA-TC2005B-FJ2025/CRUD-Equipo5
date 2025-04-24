@@ -9,9 +9,9 @@ INSERT INTO departamento (nombreDepartamento) VALUES
 
 -- Usuarios
 INSERT INTO usuario (correo, contraseñaHash) VALUES
-('admin@highpoint.edu', 'hash123admin'),
-('profe1@highpoint.edu', 'hash123profe1'),
-('alumno1@highpoint.edu', 'hash123alumno1');
+('admin@highpoint.edu', '$2b$12$uY7.0ZJWoUbsdPSiQpAK2e51.WjkfFeqVJ1J/PsD56GfbOtKs1HiC'),
+('profe1@highpoint.edu', '$2b$12$1UeqcTeAK376Xk37KZlhSOoNyXD7NcdETnTbmtMdwCa3TDVz101rW'),
+('alumno1@highpoint.edu', '$2b$12$PivYQl8qsJKmCaMjMGW6uOwYMNzyMeqDLJ1Y4BhQSmCzOdtft8.ia');
 
 -- Roles
 INSERT INTO rol (rol) VALUES
