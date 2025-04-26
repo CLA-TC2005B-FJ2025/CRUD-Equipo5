@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   const { email, password, rol } = req.body;
+  console.log(email,password,rol, " CREEDENCIALES")
   try {
     await sql.connect(DBconfig);
     let transaction = new sql.Transaction();
@@ -44,10 +45,10 @@ router.post("/", async (req, res) => {
           res.send(false);
         }
       } else {
-        res.status(401).send("Credenciales inválidas");
+        res.status(401).send("Credenciales inválidas aqui");
       }
     } else {
-      res.status(401).send("Credenciales inválidas");
+      res.status(401).send("Credenciales inválidas o aqui?");
     }
 
     await transaction.commit();
