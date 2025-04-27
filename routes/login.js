@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   const { email, password, rol } = req.body;
-  console.log(email,password,rol, " CREEDENCIALES")
+  console.log(email, password, rol, " CREEDENCIALES");
   try {
     await sql.connect(DBconfig);
     let transaction = new sql.Transaction();

@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     await sql.connect(DBconfig);
-    const result = await sql.query("SELECT * FROM usuario"); //cambie esto para reciclarlo jajaj pero es nomas para development 
+    const result = await sql.query("SELECT * FROM usuario"); //cambie esto para reciclarlo jajaj pero es nomas para development
     res.send(result.recordset);
   } catch (err) {
     console.error(err);
