@@ -1,17 +1,24 @@
-
 USE Highpoint;
 GO
 
+-- ---
+-- Insertar datos
+-- ---
+
 -- Departamentos
 INSERT INTO departamento (nombreDepartamento) VALUES
-('Ingeniería'),
-('Ciencias Sociales');
+('Académico'),
+('Deportivo'),
+('Cultural'),
+('Laboratorista'),
+('Tutores');
 
 -- Usuarios
-INSERT INTO usuario (correo, contraseñaHash) VALUES
-('admin@highpoint.edu', '$2b$12$uY7.0ZJWoUbsdPSiQpAK2e51.WjkfFeqVJ1J/PsD56GfbOtKs1HiC'),
-('profe1@highpoint.edu', '$2b$12$1UeqcTeAK376Xk37KZlhSOoNyXD7NcdETnTbmtMdwCa3TDVz101rW'),
-('alumno1@highpoint.edu', '$2b$12$PivYQl8qsJKmCaMjMGW6uOwYMNzyMeqDLJ1Y4BhQSmCzOdtft8.ia');
+INSERT INTO usuario (correo, contraseñaHash, nombre, apellidop, apellidom, idDepartamento_departamento) VALUES
+('admin@highpoint.edu', '$2b$12$uY7.0ZJWoUbsdPSiQpAK2e51.WjkfFeqVJ1J/PsD56GfbOtKs1HiC', 'Admin', 'Principal', 'Highpoint', 1),
+('profe1@highpoint.edu', '$2b$12$1UeqcTeAK376Xk37KZlhSOoNyXD7NcdETnTbmtMdwCa3TDVz101rW', 'Profe', 'Uno', 'Apellido', 2),
+('alumno1@highpoint.edu', '$2b$12$PivYQl8qsJKmCaMjMGW6uOwYMNzyMeqDLJ1Y4BhQSmCzOdtft8.ia', 'Alumno', 'Uno', 'Apellido', 3),
+('alonso@tec.mx', '$2b$12$uY7.0ZJWoUbsdPSiQpAK2e51.WjkfFeqVJ1J/PsD56GfbOtKs1HiC', 'Alonso', 'Alarcon', 'Parra', 5);
 
 -- Roles
 INSERT INTO rol (rol) VALUES
@@ -23,7 +30,10 @@ INSERT INTO rol (rol) VALUES
 INSERT INTO permiso (idUsuario_usuario, idRol_rol) VALUES
 (1, 1), -- admin
 (2, 2), -- profe
-(3, 3); -- alumno
+(3, 3), -- alumno
+(4, 1), -- a alonso darle el permiso 1 y todos ajajja
+(4, 2), 
+(4, 3); 
 
 -- Profesores
 INSERT INTO profesor (matriculaMaestro, nombre, apellidoPaterno, apellidoMaterno, idDepartamento_departamento) VALUES
@@ -38,7 +48,7 @@ INSERT INTO periodoEscolar (fechaInicio, fechaFin) VALUES
 -- Materias
 INSERT INTO materia (clave, nombreMateria, idDepartamento_departamento) VALUES
 ('MAT101', 'Álgebra', 1),
-('SOC201', 'Sociología', 2);
+('SOC201', 'Sociología', 3);
 
 -- Grupos
 INSERT INTO grupo (crn, idPeriodo_periodoEscolar, matriculaMaestro_profesor, clave_materia) VALUES

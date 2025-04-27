@@ -98,6 +98,10 @@ CREATE TABLE [usuario] (
   [idUsuario] INT IDENTITY(1,1) NOT NULL,
   [correo] VARCHAR(50) NOT NULL,
   [contraseñaHash] VARCHAR(255) NOT NULL,
+  [nombre] VARCHAR(50) NOT NULL,
+  [apellidop] VARCHAR(50) NOT NULL,
+  [apellidom] VARCHAR(50) NOT NULL,
+  [idDepartamento_departamento] INT NULL, -- aqui puse una rel para q a cada usario le corresponda un departamento
   PRIMARY KEY ([idUsuario])
 );
 
@@ -139,3 +143,5 @@ ALTER TABLE [profesor] ADD FOREIGN KEY ([idDepartamento_departamento]) REFERENCE
 
 ALTER TABLE [permiso] ADD FOREIGN KEY ([idUsuario_usuario]) REFERENCES [usuario]([idUsuario]);
 ALTER TABLE [permiso] ADD FOREIGN KEY ([idRol_rol]) REFERENCES [rol]([idRol]);
+
+ALTER TABLE [usuario] ADD FOREIGN KEY ([idDepartamento_departamento]) REFERENCES [departamento]([idDepartamento]);
