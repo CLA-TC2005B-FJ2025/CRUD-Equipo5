@@ -10,19 +10,24 @@ const app = express();
 const PUERTO = 3000;
 
 // Configuración robusta de CORS
-app.use(cors({
-  origin: "*",
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+  }),
+);
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+  );
   next();
 });
 
 // Permitir JSON grande
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/departamento", departamentos);
@@ -31,7 +36,9 @@ app.use("/login", login);
 app.use("/usuario", usuario);
 app.use("/subirArchivo", subirArchivoRouter);
 
-app.listen(PUERTO, () => console.log(`Servidor activo en http://localhost:${PUERTO}`));
+app.listen(PUERTO, () =>
+  console.log(`Servidor activo en http://localhost:${PUERTO}`),
+);
 
 const DBconfig = {
   user: "sa",

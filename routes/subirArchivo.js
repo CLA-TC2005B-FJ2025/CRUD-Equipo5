@@ -12,24 +12,28 @@ router.post("/subir", async (req, res) => {
     }
 
     const camposSistema = [
-      "Matricula", "Grupo",
-      "Comentarios", "Profesor",
-      "Clase", "Departamento"
+      "Matricula",
+      "Grupo",
+      "Comentarios",
+      "Profesor",
+      "Clase",
+      "Departamento",
     ];
 
-    const procesadas = encuestas.map(encuesta => {
+    const procesadas = encuestas.map((encuesta) => {
       // valores base
       const base = {};
-      camposSistema.forEach(campo => {
+      camposSistema.forEach((campo) => {
         base[campo] = (encuesta[campo] || "").toString().trim();
       });
 
       // preguntas dinámicas
       const preguntas = Object.entries(encuesta)
-        .filter(([clave, valor]) =>
-          !camposSistema.includes(clave) &&
-          valor != null &&
-          valor.toString().trim() !== ""
+        .filter(
+          ([clave, valor]) =>
+            !camposSistema.includes(clave) &&
+            valor != null &&
+            valor.toString().trim() !== "",
         )
         .map(([clave, valor]) => ({
           pregunta: clave.trim(),
@@ -39,45 +43,40 @@ router.post("/subir", async (req, res) => {
       return { ...base, preguntas };
     });
 
-    //si llego a esta parte, todo salio bien con lo de las encuestas, ent hay q comenzar 
+    //si llego a esta parte, todo salio bien con lo de las encuestas, ent hay q comenzar
     //a insetar los datos !
     await sql.connect(DBconfig);
     const transaction = new sql.Transaction();
     await transaction.begin();
 
     try {
-
       for (const entrada of procesadas) {
-
         // Aqui vamos a hacer todas las inserciones a la BDD, el flujo es el siguiente
-        // nos vamos recorriendo todas las entidades necesarias, checamos si ya existe  
+        // nos vamos recorriendo todas las entidades necesarias, checamos si ya existe
         // con los valores dados por el usuario, sisi, solamente la guardamos, sino tambien
         // tenemos que crearlo(a)
 
         // —————— DEPARTAMENTO ——————
-        if (!entrada.Departamento) continue; 
+        if (!entrada.Departamento) continue;
         const reqDepto = new sql.Request(transaction);
         reqDepto.input("nombreDpto", sql.VarChar(50), entrada.Departamento);
 
-        const existeDepto = await reqDepto.query( 
-          `SELECT * FROM departamento WHERE nombreDepartamento = @nombreDpto`
+        const existeDepto = await reqDepto.query(
+          `SELECT * FROM departamento WHERE nombreDepartamento = @nombreDpto`,
         );
         let idDepartamento;
 
-        if(!(existeDepto.recordset[0].idDepartamento)){
-          console.log("Creando dtop: ",entrada.Departamento)
+        if (!existeDepto.recordset[0].idDepartamento) {
+          console.log("Creando dtop: ", entrada.Departamento);
           const crearDpto = await reqDepto.query(`
-            INSERTO INTO departamento (nombreDepartamento) VALUES (@nombreDpto) `
-          )
+            INSERTO INTO departamento (nombreDepartamento) VALUES (@nombreDpto) `);
           idDepartamento = insertDpto.recordset[0].idDepartamento;
         } else {
           idDepartamento = resDpto.recordset[0].idDepartamento;
         }
 
         // PROFESOR
-        if(!entrada.Profesor) continue;
-
-
+        if (!entrada.Profesor) continue;
       }
 
       await transaction.commit();
