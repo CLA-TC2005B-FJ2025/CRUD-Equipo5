@@ -7,7 +7,7 @@ GO
 
 -- Departamentos
 INSERT INTO departamento (nombreDepartamento) VALUES
-('Académico'),
+('Academico'),
 ('Deportivo'),
 ('Cultural'),
 ('Laboratorista'),

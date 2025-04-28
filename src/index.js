@@ -23,6 +23,7 @@ app.use((req, res, next) => {
 
 // Permitir JSON grande
 app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/departamento", departamentos);
 app.use("/alumno", alumnos);
