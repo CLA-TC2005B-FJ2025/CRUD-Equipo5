@@ -16,6 +16,7 @@ router.post("/subir", async (req, res) => {
       "Grupo",
       "Comentarios",
       "Profesor",
+      "MatriculaProfesor",
       "Clase",
       "Departamento",
     ];
@@ -66,17 +67,40 @@ router.post("/subir", async (req, res) => {
         );
         let idDepartamento;
 
-        if (!existeDepto.recordset[0].idDepartamento) {
+        if (existeDepto.rowsAffected[0] == 0) {
           console.log("Creando dtop: ", entrada.Departamento);
           const crearDpto = await reqDepto.query(`
             INSERTO INTO departamento (nombreDepartamento) VALUES (@nombreDpto) `);
-          idDepartamento = insertDpto.recordset[0].idDepartamento;
+          idDepartamento = crearDpto.recordset[0].idDepartamento;
         } else {
-          idDepartamento = resDpto.recordset[0].idDepartamento;
+          idDepartamento = existeDepto.recordset[0].idDepartamento;
         }
 
-        // PROFESOR
+        // —————— PROFESOR ——————
         if (!entrada.Profesor) continue;
+        const reqProf = new sql.Request(transaction);
+        const [nombreProf, apellidoPprof, apellidoMprof] =
+          entrada.Profesor.split(" ");
+        reqProf.input("nombreProf", sql.VarChar(10), nombreProf);
+        reqProf.input("apellidoPatProf", sql.VarChar(30), apellidoPprof);
+        reqProf.input("apellidoMatProf", sql.VarChar(30), apellidoMprof);
+        reqProf.input("matriculaProf", sql.VarChar(30), entrada.MatriculaProfesor);
+        reqProf.input("idDep", sql.Int, parseInt(idDepartamento));
+
+        const existeProf = await reqProf.query(
+          `SELECT * FROM profesor WHERE nombre = @nombreProf AND apellidoPaterno = @apellidoPatProf AND apellidoMaterno = @apellidoMatProf AND matriculaMaestro = @matriculaProf`,
+        );
+        let matriculaProf = entrada.MatriculaProfesor;
+        if (existeProf.rowsAffected[0] == 0) {
+          console.log("Creando profesor: ", entrada.Profesor); 
+          const crearProf = await reqProf.query(`
+            INSERT INTO profesor
+              (matriculaMaestro, nombre, apellidoPaterno, apellidoMaterno, idDepartamento_departamento)
+            VALUES
+              (@matriculaProf, @nombreProf, @apellidoPatProf, @apellidoMatProf, @idDep);
+          `);
+          console.log(`Profesor con matricula ${matriculaProf} creado de manera exitosa!`);
+        } 
       }
 
       await transaction.commit();
