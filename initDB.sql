@@ -101,7 +101,7 @@ CREATE TABLE [usuario] (
   [nombre] VARCHAR(50) NOT NULL,
   [apellidop] VARCHAR(50) NOT NULL,
   [apellidom] VARCHAR(50) NOT NULL,
-  [idDepartamento_departamento] INT NULL, -- aqui puse una rel para q a cada usario le corresponda un departamento
+  [idDepartamento_departamento] INT NULL, -- aqui puse una relación para q a cada usario le corresponda un departamento
   PRIMARY KEY ([idUsuario])
 );
 
