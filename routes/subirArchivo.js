@@ -84,7 +84,11 @@ router.post("/subir", async (req, res) => {
         reqProf.input("nombreProf", sql.VarChar(10), nombreProf);
         reqProf.input("apellidoPatProf", sql.VarChar(30), apellidoPprof);
         reqProf.input("apellidoMatProf", sql.VarChar(30), apellidoMprof);
-        reqProf.input("matriculaProf", sql.VarChar(30), entrada.MatriculaProfesor);
+        reqProf.input(
+          "matriculaProf",
+          sql.VarChar(30),
+          entrada.MatriculaProfesor,
+        );
         reqProf.input("idDep", sql.Int, parseInt(idDepartamento));
 
         const existeProf = await reqProf.query(
@@ -92,15 +96,17 @@ router.post("/subir", async (req, res) => {
         );
         let matriculaProf = entrada.MatriculaProfesor;
         if (existeProf.rowsAffected[0] == 0) {
-          console.log("Creando profesor: ", entrada.Profesor); 
+          console.log("Creando profesor: ", entrada.Profesor);
           const crearProf = await reqProf.query(`
             INSERT INTO profesor
               (matriculaMaestro, nombre, apellidoPaterno, apellidoMaterno, idDepartamento_departamento)
             VALUES
               (@matriculaProf, @nombreProf, @apellidoPatProf, @apellidoMatProf, @idDep);
           `);
-          console.log(`Profesor con matricula ${matriculaProf} creado de manera exitosa!`);
-        } 
+          console.log(
+            `Profesor con matricula ${matriculaProf} creado de manera exitosa!`,
+          );
+        }
       }
 
       await transaction.commit();
