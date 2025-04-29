@@ -60,7 +60,7 @@ router.post("/subir", async (req, res) => {
 
         // —————— DEPARTAMENTO ——————
         if (!entrada.Departamento) continue;
-        const reqDepto = new sql.Request(transaction);
+        const reqDepto = new sql.Request();
         reqDepto.input("nombreDpto", sql.VarChar(50), entrada.Departamento);
 
         const existeDepto = await reqDepto.query(
@@ -79,7 +79,7 @@ router.post("/subir", async (req, res) => {
 
         // —————— PROFESOR ——————
         if (!entrada.Profesor) continue;
-        const reqProf = new sql.Request(transaction);
+        const reqProf = new sql.Request();
         const [nombreProf, apellidoPprof, apellidoMprof] =
           entrada.Profesor.split(" ");
         reqProf.input("nombreProf", sql.VarChar(10), nombreProf);
@@ -111,7 +111,7 @@ router.post("/subir", async (req, res) => {
 
         // —————— MATERIA ——————
         if (!entrada.Materia) continue;
-        const reqMateria = new sql.Request(transaction);
+        const reqMateria = new sql.Request();
         reqMateria.input("claveMateria", sql.VarChar(15), entrada.Materia);
         reqMateria.input("nombreMateria", sql.VarChar(30), entrada.Clase);
         reqMateria.input("idDepto", sql.Int, idDepartamento);
@@ -132,6 +132,24 @@ router.post("/subir", async (req, res) => {
           console.log(`Materia ${claveMateria} creada de manera exitosa`);
         }
 
+
+        // —————— ALUMNO ——————
+        if (!entrada.Matricula) continue; 
+        const reqAlumno = new sql.Request();
+        reqAlumno.input("matriculaAlumno", sql.VarChar(10), entrada.Matricula);
+
+        const existeAlumno = await reqAlumno.query(`
+          SELECT * from alumno WHERE matriculaAlumno = @matriculaAlumno  
+        `)
+        let matriculaAlumno = entrada.Matricula;
+
+        if(existeAlumno.rowsAffected[0] == 0){
+          console.log(`Creando al alumno con matricula ${matriculaAlumno}`);
+          const crearAlumno = await reqAlumno.query(`
+            INSERT INTO alumno VALUES (@matriculaAlumno)
+          `)
+          console.log(`Alumno con matricula ${matriculaAlumno} creado de manera exitosa!`);
+        }
 
       }
 
