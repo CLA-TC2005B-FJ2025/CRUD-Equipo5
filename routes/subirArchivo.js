@@ -303,4 +303,96 @@ router.post("/subir", async (req, res) => {
   }
 });
 
+router.get("/resumen", async (req, res) => {
+  try {
+    await sql.connect(DBconfig);
+    // Lista de maestros
+    const maestrosQuery = await sql.query(`
+      SELECT DISTINCT 
+        p.nombre + ' ' + p.apellidoPaterno + ' ' + p.apellidoMaterno AS profesor
+      FROM respuesta r
+      JOIN grupo g ON r.crn_grupo = g.crn
+      JOIN profesor p ON g.matriculaMaestro_profesor = p.matriculaMaestro;
+    `);
+    // Lista de ECOAs (crn, grupo, materia, profesor)
+    const ecoasQuery = await sql.query(`
+      SELECT DISTINCT
+        r.crn_grupo AS crn,
+        g.claveGrupo AS grupo,
+        g.clave_materia AS materia,
+        p.nombre + ' ' + p.apellidoPaterno + ' ' + p.apellidoMaterno AS profesor
+      FROM respuesta r
+      JOIN grupo g ON r.crn_grupo = g.crn
+      JOIN profesor p ON g.matriculaMaestro_profesor = p.matriculaMaestro;
+    `);
+
+    res.json({
+      maestros: maestrosQuery.recordset.map(r => r.profesor),
+      ecoas: ecoasQuery.recordset,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error al obtener resumen" });
+  }
+});
+
+// GET /subirArchivo/resumenConConteo
+router.get("/resumenConConteo", async (req, res) => {
+  await sql.connect(DBconfig);
+  const { recordset } = await sql.query(`
+    SELECT
+      g.crn,
+      g.clave_materia AS materia,
+      p.nombre + ' ' + p.apellidoPaterno + ' ' + p.apellidoMaterno AS profesor,
+      g.claveGrupo AS grupo,
+      COUNT(r.matriculaAlumno_alumno) AS respuestasCount
+    FROM grupo g
+    JOIN profesor p 
+      ON g.matriculaMaestro_profesor = p.matriculaMaestro
+    LEFT JOIN respuesta r 
+      ON r.crn_grupo = g.crn
+    GROUP BY
+      g.crn, g.clave_materia, g.claveGrupo,
+      p.nombre, p.apellidoPaterno, p.apellidoMaterno
+    ORDER BY respuestasCount DESC;
+  `);
+  const total = recordset.reduce((sum, x) => sum + x.respuestasCount, 0);
+  res.json({ ecoas: recordset, total });
+});
+
+
+// GET /subirArchivo/datos/:crn -> Devuelve respuestas para una ECOA específica
+router.get("/datos/:crn", async (req, res) => {
+  try {
+    // 1) Parseamos el CRN
+    const crn = parseInt(req.params.crn, 10);
+    if (isNaN(crn)) {
+      return res.status(400).json({ error: "CRN inválido" });
+    }
+
+    // 2) Conectamos y creamos la Request
+    await sql.connect(DBconfig);
+    const request = new sql.Request();
+    request.input("crn", sql.Int, crn);
+
+    // 3) Hacemos la consulta usando @crn correctamente declarado
+    const result = await request.query(`
+      SELECT 
+        a.matriculaAlumno AS alumno,
+        p.texto             AS pregunta,
+        r.respuesta         AS respuesta
+      FROM respuesta r
+      JOIN pregunta p ON r.idPregunta_pregunta = p.idPregunta
+      JOIN alumno a   ON r.matriculaAlumno_alumno = a.matriculaAlumno
+      WHERE r.crn_grupo = @crn;
+    `);
+
+    // 4) Devolvemos el recordset
+    res.json({ respuestas: result.recordset });
+  } catch (err) {
+    console.error("Error al obtener datos:", err);
+    res.status(500).json({ error: "Error al obtener datos" });
+  }
+});
+
 export default router;
