@@ -4,6 +4,7 @@ import departamentos from "../routes/departamento.js";
 import alumnos from "../routes/alumno.js";
 import login from "../routes/login.js";
 import usuario from "../routes/usuario.js";
+import directorio from "../routes/directorio.js"
 import subirArchivoRouter from "../routes/subirArchivo.js";
 
 const app = express();
@@ -31,6 +32,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/departamento", departamentos);
+app.use("/directorio",directorio);
 app.use("/alumno", alumnos);
 app.use("/login", login);
 app.use("/usuario", usuario);

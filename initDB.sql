@@ -151,3 +151,27 @@ ALTER TABLE [usuario] ADD FOREIGN KEY ([idDepartamento_departamento]) REFERENCES
 --  Temporalmente
 INSERT INTO periodoEscolar (fechaInicio, fechaFin)
 VALUES ('2025-08-01', '2025-12-15');
+
+INSERT INTO departamento (nombreDepartamento) VALUES
+('Academico'),
+('Deportivo'),
+('Cultural'),
+('Laboratorista'),
+('Tutores');
+
+-- Usuarios
+INSERT INTO usuario (correo, contraseñaHash, nombre, apellidop, apellidom, idDepartamento_departamento) VALUES
+('alonso@tec.mx', '$2b$12$uY7.0ZJWoUbsdPSiQpAK2e51.WjkfFeqVJ1J/PsD56GfbOtKs1HiC', 'Alonso', 'Alarcon', 'Parra', 5);
+
+-- Roles
+INSERT INTO rol (rol) VALUES
+('Administrador'),
+('Profesor'),
+('Alumno');
+
+-- Permisos
+INSERT INTO permiso (idUsuario_usuario, idRol_rol) VALUES
+(1, 1), -- a alonso darle el permiso 1 y todos ajajja
+(1, 2), 
+(1, 3); 
+
