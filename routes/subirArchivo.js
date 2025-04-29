@@ -64,17 +64,20 @@ router.post("/subir", async (req, res) => {
         reqDepto.input("nombreDpto", sql.VarChar(50), entrada.Departamento);
 
         const existeDepto = await reqDepto.query(
-          `SELECT * FROM departamento WHERE nombreDepartamento = @nombreDpto`,
+          `SELECT idDepartamento FROM departamento WHERE nombreDepartamento = @nombreDpto`
         );
+        
         let idDepartamento;
-
-        if (existeDepto.rowsAffected[0] == 0) {
-          console.log("Creando dtop: ", entrada.Departamento);
-          const crearDpto = await reqDepto.query(`
-            INSERT INTO departamento (nombreDepartamento) VALUES (@nombreDpto) `);
-          idDepartamento = crearDpto.recordset[0].idDepartamento;
-        } else {
+        if (existeDepto.recordset.length > 0) {
           idDepartamento = existeDepto.recordset[0].idDepartamento;
+        } else {
+          const crearDepto = await reqDepto.query(`
+            INSERT INTO departamento (nombreDepartamento)
+            OUTPUT INSERTED.idDepartamento
+            VALUES (@nombreDpto);
+            `);
+          console.log(`Depto ${entrada.Departamento} creado de manera exitosa!`)
+          idDepartamento = crearDepto.recordset[0].idDepartamento;
         }
 
         // —————— PROFESOR ——————
@@ -150,6 +153,76 @@ router.post("/subir", async (req, res) => {
           `)
           console.log(`Alumno con matricula ${matriculaAlumno} creado de manera exitosa!`);
         }
+
+        // —————— GRUPO ——————
+        if (!entrada.Grupo) continue; 
+        const reqGrupo = new sql.Request();
+        reqGrupo
+          .input("claveGrupo",      sql.VarChar(5),  entrada.Grupo)
+          .input("periodoId",       sql.Int,         1)               
+          .input("matriculaMaestro",sql.VarChar(10), matriculaProf)  
+          .input("claveMateria",    sql.VarChar(15), claveMateria);   
+
+        const existeGpo = await reqGrupo.query(`
+          SELECT * from grupo WHERE claveGrupo = @clavegrupo AND matriculaMaestro_profesor = @matriculaMaestro AND clave_materia = @claveMateria
+        `)
+        let grupo = entrada.Grupo;
+
+        if (existeGpo.recordset.length == 0) {
+          console.log(`Creando grupo ${entrada.Grupo}.${claveMateria}`);
+          await reqGrupo.query(`
+            INSERT INTO grupo
+              (claveGrupo, idPeriodo_periodoEscolar, matriculaMaestro_profesor, clave_materia)
+            VALUES
+              (@claveGrupo, @periodoId, @matriculaMaestro, @claveMateria);
+          `);
+          console.log(`Grupo ${entrada.Grupo}.${claveMateria} creado de manera exitosa!`);
+        }
+        
+        // —————— PREGUNTAS - RESPUESTAS ——————
+        for (const dato of entrada.preguntas) {
+          const texto = dato.pregunta;
+          const reqPregunta = new sql.Request();
+          reqPregunta.input("textoPregunta", sql.VarChar(250), texto);
+        
+          //revisar si existe la preg
+          const existe = await reqPregunta.query(`
+            SELECT idPregunta 
+              FROM pregunta 
+             WHERE texto = @textoPregunta;
+          `);
+        
+          let idPregunta;
+          if (existe.recordset.length > 0) {
+            idPregunta = existe.recordset[0].idPregunta;
+          } else {
+            ///noexiste 
+            const creado = await reqPregunta.query(`
+              INSERT INTO pregunta (texto)
+              OUTPUT INSERTED.idPregunta
+              VALUES (@textoPregunta);
+            `);
+            idPregunta = creado.recordset[0].idPregunta;
+            console.log(`Pregunta "${texto}" creada con id ${idPregunta}`);
+          }
+        
+          //siempre debe d haber una pregunta para poder insertar la respuesta
+          const reqResp = new sql.Request();
+          reqResp
+            .input("matriculaAlumno", sql.VarChar(10), entrada.MatriculaAlumno)
+            .input("idPregunta",      sql.Int,          idPregunta)
+            .input("respuesta",       sql.Int,          dato.respuesta)
+            .input("crn_grupo",       sql.Int,          idGrupo);
+        
+          await reqResp.query(`
+            INSERT INTO respuesta
+              (matriculaAlumno_alumno, idPregunta_pregunta, respuesta, crn_grupo)
+            VALUES
+              (@matriculaAlumno, @idPregunta, @respuesta, @crn_grupo);
+          `);
+        }
+        
+
 
       }
 

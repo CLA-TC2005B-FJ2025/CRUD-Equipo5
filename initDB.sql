@@ -14,10 +14,11 @@ GO
 
 DROP TABLE IF EXISTS [grupo];
 CREATE TABLE [grupo] (
-  [crn] VARCHAR(15) NOT NULL,
-  [idPeriodo_periodoEscolar] INT NOT NULL,
+  [crn] INT IDENTITY(1,1) NOT NULL,
+  [idPeriodo_periodoEscolar] INT NOT NULL, --por mientras todos son 1 (agosto)
   [matriculaMaestro_profesor] VARCHAR(10) NOT NULL,
   [clave_materia] VARCHAR(15) NOT NULL,
+  [claveGrupo] VARCHAR(5) NOT NULL,
   PRIMARY KEY ([crn])
 );
 
@@ -33,14 +34,14 @@ CREATE TABLE [respuesta] (
   [matriculaAlumno_alumno] VARCHAR(10) NOT NULL,
   [respuesta] INT NULL,
   [idPregunta_pregunta] INT NULL,
-  [crn_grupo] VARCHAR(15) NOT NULL,
+  [crn_grupo] INT NOT NULL,
   PRIMARY KEY ([idRespuesta])
 );
 
 DROP TABLE IF EXISTS [comentario];
 CREATE TABLE [comentario] (
   [idComentario] INT IDENTITY(1,1) NOT NULL,
-  [crn] VARCHAR(15) NOT NULL,
+  [crn] INT NOT NULL,
   [comentario] VARCHAR(250) NOT NULL,
   [matriculaAlumno_alumno] VARCHAR(10) NOT NULL,
   PRIMARY KEY ([idComentario])
@@ -63,11 +64,11 @@ CREATE TABLE [departamento] (
 
 DROP TABLE IF EXISTS [inscrito];
 CREATE TABLE [inscrito] (
-  [crn_grupo] VARCHAR(15) NOT NULL,
+  [crn_grupo] INT NOT NULL,
   [matriculaAlumno_alumno] VARCHAR(10) NOT NULL,
   PRIMARY KEY ([crn_grupo], [matriculaAlumno_alumno])
 );
-
+--por el momento vale burger
 DROP TABLE IF EXISTS [periodoEscolar];
 CREATE TABLE [periodoEscolar] (
   [idPeriodo] INT IDENTITY(1,1) NOT NULL,
@@ -145,3 +146,8 @@ ALTER TABLE [permiso] ADD FOREIGN KEY ([idUsuario_usuario]) REFERENCES [usuario]
 ALTER TABLE [permiso] ADD FOREIGN KEY ([idRol_rol]) REFERENCES [rol]([idRol]);
 
 ALTER TABLE [usuario] ADD FOREIGN KEY ([idDepartamento_departamento]) REFERENCES [departamento]([idDepartamento]);
+
+
+--  Temporalmente
+INSERT INTO periodoEscolar (fechaInicio, fechaFin)
+VALUES ('2025-08-01', '2025-12-15');
