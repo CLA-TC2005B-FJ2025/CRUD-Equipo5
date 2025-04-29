@@ -166,17 +166,22 @@ router.post("/subir", async (req, res) => {
         const existeGpo = await reqGrupo.query(`
           SELECT * from grupo WHERE claveGrupo = @clavegrupo AND matriculaMaestro_profesor = @matriculaMaestro AND clave_materia = @claveMateria
         `)
-        let grupo = entrada.Grupo;
 
+        let nuevoCrn = existeGpo.recordset[0].crn;
         if (existeGpo.recordset.length == 0) {
           console.log(`Creando grupo ${entrada.Grupo}.${claveMateria}`);
-          await reqGrupo.query(`
+          const crearGrupo = await reqGrupo.query(`
             INSERT INTO grupo
-              (claveGrupo, idPeriodo_periodoEscolar, matriculaMaestro_profesor, clave_materia)
+            (claveGrupo, idPeriodo_periodoEscolar, matriculaMaestro_profesor, clave_materia)
             VALUES
-              (@claveGrupo, @periodoId, @matriculaMaestro, @claveMateria);
-          `);
-          console.log(`Grupo ${entrada.Grupo}.${claveMateria} creado de manera exitosa!`);
+            (@claveGrupo, @periodoId, @matriculaMaestro, @claveMateria);
+            
+            SELECT CAST(SCOPE_IDENTITY() AS INT) AS crn;
+            `);
+            
+          nuevoCrn = crearGrupo.recordset[0].crn;
+          console.log("CRNDOS",nuevoCrn)
+          console.log(`Grupo creado con CRN = ${nuevoCrn}`);
         }
         
         // —————— PREGUNTAS - RESPUESTAS ——————
@@ -209,10 +214,10 @@ router.post("/subir", async (req, res) => {
           //siempre debe d haber una pregunta para poder insertar la respuesta
           const reqResp = new sql.Request();
           reqResp
-            .input("matriculaAlumno", sql.VarChar(10), entrada.MatriculaAlumno)
+            .input("matriculaAlumno", sql.VarChar(10), matriculaAlumno)
             .input("idPregunta",      sql.Int,          idPregunta)
             .input("respuesta",       sql.Int,          dato.respuesta)
-            .input("crn_grupo",       sql.Int,          idGrupo);
+            .input("crn_grupo",       sql.Int,          nuevoCrn);
         
           await reqResp.query(`
             INSERT INTO respuesta
