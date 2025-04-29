@@ -234,9 +234,53 @@ router.post("/subir", async (req, res) => {
           console.log(`Respuesta para pregunta ${idPregunta} insertada en grupo ${nuevoCrn}`);
         }
 
-        
+        // —————— COMENTARIO ——————
+        if (entrada.Comentarios && entrada.Comentarios.trim() !== "") {
+          const reqComentario = new sql.Request();
+          reqComentario
+            .input("crn",                sql.Int,        nuevoCrn)
+            .input("comentario",         sql.VarChar(250), entrada.Comentarios.trim())
+            .input("matriculaAlumno",    sql.VarChar(10), entrada.Matricula);
 
+          await reqComentario.query(`
+            INSERT INTO comentario
+              (crn, comentario, matriculaAlumno_alumno)
+            VALUES
+              (@crn, @comentario, @matriculaAlumno);
+          `);
+          console.log(
+            `Comentario insertado para alumno ${entrada.Matricula} en grupo ${nuevoCrn}`
+          );
+        }
 
+        // —————— INSCRITO ——————
+        if (entrada.Matricula && nuevoCrn) {
+          const reqInscrito = new sql.Request();
+          reqInscrito
+            .input("crn_grupo",        sql.Int,           nuevoCrn)
+            .input("matriculaAlumno",  sql.VarChar(10),   entrada.Matricula);
+
+          //ya esta inscrito
+          const existeInscrito = await reqInscrito.query(`
+            SELECT 1
+              FROM inscrito
+            WHERE crn_grupo = @crn_grupo
+              AND matriculaAlumno_alumno = @matriculaAlumno;
+          `);
+
+          if (existeInscrito.recordset.length === 0) {
+            //sino insertarlo
+            await reqInscrito.query(`
+              INSERT INTO inscrito
+                (crn_grupo, matriculaAlumno_alumno)
+              VALUES
+                (@crn_grupo, @matriculaAlumno);
+            `);
+            console.log(`Alumno ${entrada.Matricula} inscrito en grupo CRN=${nuevoCrn}`);
+          } else {
+            console.log(`Alumno ${entrada.Matricula} ya inscrito en grupo CRN=${nuevoCrn}`);
+          }
+        }
       }
 
       await transaction.commit();
