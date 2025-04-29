@@ -93,4 +93,41 @@ router.post("/", async (req, res) => {
   }
 });
 
+// GET /usuario/:id -> obtener datos básicos del usuario
+router.get("/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "ID de usuario inválido" });
+    }
+
+    await sql.connect(DBconfig);
+    const request = new sql.Request();
+    request.input("idUsuario", sql.Int, id);
+
+    const result = await request.query(`
+      SELECT idUsuario, correo, nombre, apellidop, apellidom, idDepartamento_departamento
+      FROM usuario
+      WHERE idUsuario = @idUsuario;
+    `);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    const user = result.recordset[0];
+    res.json({
+      idUsuario: user.idUsuario,
+      correo: user.correo,
+      nombre: user.nombre,
+      apellidop: user.apellidop,
+      apellidom: user.apellidom,
+      idDepartamento: user.idDepartamento_departamento
+    });
+  } catch (err) {
+    console.error("Error al obtener usuario:", err);
+    res.status(500).json({ error: "Error interno al obtener usuario" });
+  }
+});
+
 export default router;

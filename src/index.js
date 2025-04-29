@@ -6,6 +6,8 @@ import login from "../routes/login.js";
 import usuario from "../routes/usuario.js";
 import directorio from "../routes/directorio.js"
 import subirArchivoRouter from "../routes/subirArchivo.js";
+import infoDestacada from "../routes/materia.js";
+import gestionComentarios from "../routes/gestionComentario.js"
 
 const app = express();
 const PUERTO = 3000;
@@ -37,6 +39,9 @@ app.use("/alumno", alumnos);
 app.use("/login", login);
 app.use("/usuario", usuario);
 app.use("/subirArchivo", subirArchivoRouter);
+app.use('/info', infoDestacada);
+app.use('/comentarios',gestionComentarios)
+
 
 app.listen(PUERTO, () =>
   console.log(`Servidor activo en http://localhost:${PUERTO}`),

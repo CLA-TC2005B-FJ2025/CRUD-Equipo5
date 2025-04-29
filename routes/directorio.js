@@ -4,6 +4,24 @@ import DBconfig from "../src/index.js";
 
 const router = express.Router();
 
+// GET /directorio/profesores -> lista de profesores
+router.get("/profesores", async (req, res) => {
+  try {
+    await sql.connect(DBconfig);
+    const result = await sql.query(
+      `SELECT 
+         matriculaMaestro, 
+         nombre + ' ' + apellidoPaterno + ' ' + apellidoMaterno AS nombreCompleto
+       FROM profesor;
+      `
+    );
+    res.json({ profesores: result.recordset });
+  } catch (err) {
+    console.error("Error al obtener profesores:", err);
+    res.status(500).json({ error: "Error al obtener lista de profesores" });
+  }
+});
+
 // GET /directorio/profesores/count
 router.get("/profesores/count", async (req, res) => {
   try {

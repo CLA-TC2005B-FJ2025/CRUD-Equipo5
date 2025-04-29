@@ -159,10 +159,10 @@ router.post("/subir", async (req, res) => {
 
         const reqGrupo = new sql.Request();
         reqGrupo
-          .input("claveGrupo",       sql.VarChar(5),  entrada.Grupo)
-          .input("periodoId",        sql.Int,         1)              // o tu id dinámico de periodo
-          .input("matriculaMaestro", sql.VarChar(10), matriculaProf)  // p.ej. "A001"
-          .input("claveMateria",     sql.VarChar(15), claveMateria);   // p.ej. "TC2005"
+          .input("claveGrupo",       sql.VarChar(5),  entrada.Grupo) //1A 2B ...
+          .input("periodoId",        sql.Int,         1)              // harcodeado
+          .input("matriculaMaestro", sql.VarChar(10), matriculaProf)  // "A001"
+          .input("claveMateria",     sql.VarChar(15), claveMateria);   // "TC2005"
 
         // 1) Compruebo si el grupo ya existe
         const existeGpo = await reqGrupo.query(`
