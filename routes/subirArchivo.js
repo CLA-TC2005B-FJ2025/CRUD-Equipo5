@@ -155,77 +155,85 @@ router.post("/subir", async (req, res) => {
         }
 
         // —————— GRUPO ——————
-        if (!entrada.Grupo) continue; 
+        if (!entrada.Grupo) continue;
+
         const reqGrupo = new sql.Request();
         reqGrupo
-          .input("claveGrupo",      sql.VarChar(5),  entrada.Grupo)
-          .input("periodoId",       sql.Int,         1)               
-          .input("matriculaMaestro",sql.VarChar(10), matriculaProf)  
-          .input("claveMateria",    sql.VarChar(15), claveMateria);   
+          .input("claveGrupo",       sql.VarChar(5),  entrada.Grupo)
+          .input("periodoId",        sql.Int,         1)              // o tu id dinámico de periodo
+          .input("matriculaMaestro", sql.VarChar(10), matriculaProf)  // p.ej. "A001"
+          .input("claveMateria",     sql.VarChar(15), claveMateria);   // p.ej. "TC2005"
 
+        // 1) Compruebo si el grupo ya existe
         const existeGpo = await reqGrupo.query(`
-          SELECT * from grupo WHERE claveGrupo = @clavegrupo AND matriculaMaestro_profesor = @matriculaMaestro AND clave_materia = @claveMateria
-        `)
+          SELECT crn
+            FROM grupo
+          WHERE claveGrupo = @claveGrupo
+            AND matriculaMaestro_profesor = @matriculaMaestro
+            AND clave_materia = @claveMateria;
+        `);
 
-        let nuevoCrn = existeGpo.recordset[0].crn;
-        if (existeGpo.recordset.length == 0) {
-          console.log(`Creando grupo ${entrada.Grupo}.${claveMateria}`);
+        let nuevoCrn;
+        if (existeGpo.recordset.length === 0) {
+          // 2a) No existe → lo inserto y obtengo el CRN generado
           const crearGrupo = await reqGrupo.query(`
             INSERT INTO grupo
-            (claveGrupo, idPeriodo_periodoEscolar, matriculaMaestro_profesor, clave_materia)
+              (claveGrupo, idPeriodo_periodoEscolar, matriculaMaestro_profesor, clave_materia)
+            OUTPUT INSERTED.crn
             VALUES
-            (@claveGrupo, @periodoId, @matriculaMaestro, @claveMateria);
-            
-            SELECT CAST(SCOPE_IDENTITY() AS INT) AS crn;
-            `);
-            
+              (@claveGrupo, @periodoId, @matriculaMaestro, @claveMateria);
+          `);
           nuevoCrn = crearGrupo.recordset[0].crn;
-          console.log("CRNDOS",nuevoCrn)
-          console.log(`Grupo creado con CRN = ${nuevoCrn}`);
+          console.log(`Grupo ${entrada.Grupo}.${claveMateria} creado con CRN = ${nuevoCrn}`);
+        } else {
+          // 2b) Ya existía → tomo el CRN del SELECT
+          nuevoCrn = existeGpo.recordset[0].crn;
+          console.log(`Grupo ya existe con CRN = ${nuevoCrn}`);
         }
-        
-        // —————— PREGUNTAS - RESPUESTAS ——————
+
+        // —————— PREGUNTAS + RESPUESTAS ——————
         for (const dato of entrada.preguntas) {
+          // 3) Aseguro que la pregunta exista (o la creo y obtengo su id)
           const texto = dato.pregunta;
           const reqPregunta = new sql.Request();
           reqPregunta.input("textoPregunta", sql.VarChar(250), texto);
-        
-          //revisar si existe la preg
-          const existe = await reqPregunta.query(`
-            SELECT idPregunta 
-              FROM pregunta 
-             WHERE texto = @textoPregunta;
+
+          const existePregunta = await reqPregunta.query(`
+            SELECT idPregunta
+              FROM pregunta
+            WHERE texto = @textoPregunta;
           `);
-        
+
           let idPregunta;
-          if (existe.recordset.length > 0) {
-            idPregunta = existe.recordset[0].idPregunta;
+          if (existePregunta.recordset.length > 0) {
+            idPregunta = existePregunta.recordset[0].idPregunta;
           } else {
-            ///noexiste 
-            const creado = await reqPregunta.query(`
+            const crearPregunta = await reqPregunta.query(`
               INSERT INTO pregunta (texto)
               OUTPUT INSERTED.idPregunta
               VALUES (@textoPregunta);
             `);
-            idPregunta = creado.recordset[0].idPregunta;
-            console.log(`Pregunta "${texto}" creada con id ${idPregunta}`);
+            idPregunta = crearPregunta.recordset[0].idPregunta;
+            console.log(`Pregunta "${texto}" creada con id = ${idPregunta}`);
           }
-        
-          //siempre debe d haber una pregunta para poder insertar la respuesta
+
+          // 4) Inserto la respuesta usando el nuevoCrn y el idPregunta
           const reqResp = new sql.Request();
           reqResp
-            .input("matriculaAlumno", sql.VarChar(10), matriculaAlumno)
+            .input("matriculaAlumno", sql.VarChar(10), entrada.Matricula)
             .input("idPregunta",      sql.Int,          idPregunta)
             .input("respuesta",       sql.Int,          dato.respuesta)
             .input("crn_grupo",       sql.Int,          nuevoCrn);
-        
+
           await reqResp.query(`
             INSERT INTO respuesta
               (matriculaAlumno_alumno, idPregunta_pregunta, respuesta, crn_grupo)
             VALUES
               (@matriculaAlumno, @idPregunta, @respuesta, @crn_grupo);
           `);
+          console.log(`Respuesta para pregunta ${idPregunta} insertada en grupo ${nuevoCrn}`);
         }
+
         
 
 
