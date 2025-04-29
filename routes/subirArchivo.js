@@ -13,6 +13,7 @@ router.post("/subir", async (req, res) => {
 
     const camposSistema = [
       "Matricula",
+      "Materia",
       "Grupo",
       "Comentarios",
       "Profesor",
@@ -70,7 +71,7 @@ router.post("/subir", async (req, res) => {
         if (existeDepto.rowsAffected[0] == 0) {
           console.log("Creando dtop: ", entrada.Departamento);
           const crearDpto = await reqDepto.query(`
-            INSERTO INTO departamento (nombreDepartamento) VALUES (@nombreDpto) `);
+            INSERT INTO departamento (nombreDepartamento) VALUES (@nombreDpto) `);
           idDepartamento = crearDpto.recordset[0].idDepartamento;
         } else {
           idDepartamento = existeDepto.recordset[0].idDepartamento;
@@ -107,6 +108,31 @@ router.post("/subir", async (req, res) => {
             `Profesor con matricula ${matriculaProf} creado de manera exitosa!`,
           );
         }
+
+        // —————— MATERIA ——————
+        if (!entrada.Materia) continue;
+        const reqMateria = new sql.Request(transaction);
+        reqMateria.input("claveMateria", sql.VarChar(15), entrada.Materia);
+        reqMateria.input("nombreMateria", sql.VarChar(30), entrada.Clase);
+        reqMateria.input("idDepto", sql.Int, idDepartamento);
+
+        const existeMateria = await reqMateria.query(
+          `SELECT * FROM materia WHERE 
+          clave = @claveMateria AND nombreMateria = @nombreMateria AND idDepartamento_departamento = @idDepto`,
+        );
+        let claveMateria = entrada.Materia;
+        if (existeMateria.rowsAffected[0] == 0) {
+          console.log("Creando la materia: ", claveMateria);
+          const crearMateria = await reqMateria.query(`
+            INSERT INTO materia
+              (clave, nombreMateria, idDepartamento_departamento)
+            VALUES
+              (@claveMateria, @nombreMateria, @idDepto);
+          `);
+          console.log(`Materia ${claveMateria} creada de manera exitosa`);
+        }
+
+
       }
 
       await transaction.commit();
