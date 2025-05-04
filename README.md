@@ -1,4 +1,4 @@
-# CRUD-Equipo5 - REST API para operaciones CRUD utilizando Node y Express.js
+# REST API para operaciones CRUD para plataforma de ECOA's
 Esta es la implementación de nuestro API para todas las operaciones CRUD realizadas por nuestra
 plataforma de ECOA's de Highpoint International!
 
