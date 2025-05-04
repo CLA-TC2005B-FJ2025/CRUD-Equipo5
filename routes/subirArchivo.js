@@ -319,14 +319,15 @@ router.get("/resumen", async (req, res) => {
     // 2. Lista de ECOAs con agregados
     const ecoasQuery = await sql.query(`
       SELECT 
-        g.crn                    AS crn,
-        g.claveGrupo             AS grupo,
-        g.clave_materia          AS materia,
+        g.crn AS crn,
+        g.claveGrupo AS grupo,
+        g.clave_materia AS materia,
         p.nombre + ' ' + p.apellidoPaterno + ' ' + p.apellidoMaterno AS profesor,
-
-        COUNT(DISTINCT r.matriculaAlumno_alumno) AS respuestasCount,
-        CAST(AVG(CAST(r.respuesta AS DECIMAL(5,2))) AS FLOAT)  AS promedioGlobal,
-        COUNT(c.comentario)                                   AS comentariosCount
+    
+        COUNT(DISTINCT r.matriculaAlumno_alumno)      AS respuestasCount,
+        CAST(AVG(CAST(r.respuesta AS DECIMAL(5,2))) AS FLOAT) AS promedioGlobal,
+        COUNT(DISTINCT c.idComentario)                AS comentariosCount
+    
       FROM grupo g
       JOIN profesor p 
         ON g.matriculaMaestro_profesor = p.matriculaMaestro
