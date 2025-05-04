@@ -122,7 +122,7 @@ router.get("/:id", async (req, res) => {
       nombre: user.nombre,
       apellidop: user.apellidop,
       apellidom: user.apellidom,
-      idDepartamento: user.idDepartamento_departamento
+      idDepartamento: user.idDepartamento_departamento,
     });
   } catch (err) {
     console.error("Error al obtener usuario:", err);

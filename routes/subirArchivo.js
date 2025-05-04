@@ -64,9 +64,9 @@ router.post("/subir", async (req, res) => {
         reqDepto.input("nombreDpto", sql.VarChar(50), entrada.Departamento);
 
         const existeDepto = await reqDepto.query(
-          `SELECT idDepartamento FROM departamento WHERE nombreDepartamento = @nombreDpto`
+          `SELECT idDepartamento FROM departamento WHERE nombreDepartamento = @nombreDpto`,
         );
-        
+
         let idDepartamento;
         if (existeDepto.recordset.length > 0) {
           idDepartamento = existeDepto.recordset[0].idDepartamento;
@@ -76,7 +76,9 @@ router.post("/subir", async (req, res) => {
             OUTPUT INSERTED.idDepartamento
             VALUES (@nombreDpto);
             `);
-          console.log(`Depto ${entrada.Departamento} creado de manera exitosa!`)
+          console.log(
+            `Depto ${entrada.Departamento} creado de manera exitosa!`,
+          );
           idDepartamento = crearDepto.recordset[0].idDepartamento;
         }
 
@@ -135,23 +137,24 @@ router.post("/subir", async (req, res) => {
           console.log(`Materia ${claveMateria} creada de manera exitosa`);
         }
 
-
         // —————— ALUMNO ——————
-        if (!entrada.Matricula) continue; 
+        if (!entrada.Matricula) continue;
         const reqAlumno = new sql.Request();
         reqAlumno.input("matriculaAlumno", sql.VarChar(10), entrada.Matricula);
 
         const existeAlumno = await reqAlumno.query(`
           SELECT * from alumno WHERE matriculaAlumno = @matriculaAlumno  
-        `)
+        `);
         let matriculaAlumno = entrada.Matricula;
 
-        if(existeAlumno.rowsAffected[0] == 0){
+        if (existeAlumno.rowsAffected[0] == 0) {
           console.log(`Creando al alumno con matricula ${matriculaAlumno}`);
           const crearAlumno = await reqAlumno.query(`
             INSERT INTO alumno VALUES (@matriculaAlumno)
-          `)
-          console.log(`Alumno con matricula ${matriculaAlumno} creado de manera exitosa!`);
+          `);
+          console.log(
+            `Alumno con matricula ${matriculaAlumno} creado de manera exitosa!`,
+          );
         }
 
         // —————— GRUPO ——————
@@ -159,10 +162,10 @@ router.post("/subir", async (req, res) => {
 
         const reqGrupo = new sql.Request();
         reqGrupo
-          .input("claveGrupo",       sql.VarChar(5),  entrada.Grupo) //1A 2B ...
-          .input("periodoId",        sql.Int,         1)              // harcodeado
-          .input("matriculaMaestro", sql.VarChar(10), matriculaProf)  // "A001"
-          .input("claveMateria",     sql.VarChar(15), claveMateria);   // "TC2005"
+          .input("claveGrupo", sql.VarChar(5), entrada.Grupo) //1A 2B ...
+          .input("periodoId", sql.Int, 1) // harcodeado
+          .input("matriculaMaestro", sql.VarChar(10), matriculaProf) // "A001"
+          .input("claveMateria", sql.VarChar(15), claveMateria); // "TC2005"
 
         // 1) Compruebo si el grupo ya existe
         const existeGpo = await reqGrupo.query(`
@@ -184,7 +187,9 @@ router.post("/subir", async (req, res) => {
               (@claveGrupo, @periodoId, @matriculaMaestro, @claveMateria);
           `);
           nuevoCrn = crearGrupo.recordset[0].crn;
-          console.log(`Grupo ${entrada.Grupo}.${claveMateria} creado con CRN = ${nuevoCrn}`);
+          console.log(
+            `Grupo ${entrada.Grupo}.${claveMateria} creado con CRN = ${nuevoCrn}`,
+          );
         } else {
           // 2b) Ya existía → tomo el CRN del SELECT
           nuevoCrn = existeGpo.recordset[0].crn;
@@ -221,9 +226,9 @@ router.post("/subir", async (req, res) => {
           const reqResp = new sql.Request();
           reqResp
             .input("matriculaAlumno", sql.VarChar(10), entrada.Matricula)
-            .input("idPregunta",      sql.Int,          idPregunta)
-            .input("respuesta",       sql.Int,          dato.respuesta)
-            .input("crn_grupo",       sql.Int,          nuevoCrn);
+            .input("idPregunta", sql.Int, idPregunta)
+            .input("respuesta", sql.Int, dato.respuesta)
+            .input("crn_grupo", sql.Int, nuevoCrn);
 
           await reqResp.query(`
             INSERT INTO respuesta
@@ -231,16 +236,18 @@ router.post("/subir", async (req, res) => {
             VALUES
               (@matriculaAlumno, @idPregunta, @respuesta, @crn_grupo);
           `);
-          console.log(`Respuesta para pregunta ${idPregunta} insertada en grupo ${nuevoCrn}`);
+          console.log(
+            `Respuesta para pregunta ${idPregunta} insertada en grupo ${nuevoCrn}`,
+          );
         }
 
         // —————— COMENTARIO ——————
         if (entrada.Comentarios && entrada.Comentarios.trim() !== "") {
           const reqComentario = new sql.Request();
           reqComentario
-            .input("crn",                sql.Int,        nuevoCrn)
-            .input("comentario",         sql.VarChar(250), entrada.Comentarios.trim())
-            .input("matriculaAlumno",    sql.VarChar(10), entrada.Matricula);
+            .input("crn", sql.Int, nuevoCrn)
+            .input("comentario", sql.VarChar(250), entrada.Comentarios.trim())
+            .input("matriculaAlumno", sql.VarChar(10), entrada.Matricula);
 
           await reqComentario.query(`
             INSERT INTO comentario
@@ -249,7 +256,7 @@ router.post("/subir", async (req, res) => {
               (@crn, @comentario, @matriculaAlumno);
           `);
           console.log(
-            `Comentario insertado para alumno ${entrada.Matricula} en grupo ${nuevoCrn}`
+            `Comentario insertado para alumno ${entrada.Matricula} en grupo ${nuevoCrn}`,
           );
         }
 
@@ -257,8 +264,8 @@ router.post("/subir", async (req, res) => {
         if (entrada.Matricula && nuevoCrn) {
           const reqInscrito = new sql.Request();
           reqInscrito
-            .input("crn_grupo",        sql.Int,           nuevoCrn)
-            .input("matriculaAlumno",  sql.VarChar(10),   entrada.Matricula);
+            .input("crn_grupo", sql.Int, nuevoCrn)
+            .input("matriculaAlumno", sql.VarChar(10), entrada.Matricula);
 
           //ya esta inscrito
           const existeInscrito = await reqInscrito.query(`
@@ -276,9 +283,13 @@ router.post("/subir", async (req, res) => {
               VALUES
                 (@crn_grupo, @matriculaAlumno);
             `);
-            console.log(`Alumno ${entrada.Matricula} inscrito en grupo CRN=${nuevoCrn}`);
+            console.log(
+              `Alumno ${entrada.Matricula} inscrito en grupo CRN=${nuevoCrn}`,
+            );
           } else {
-            console.log(`Alumno ${entrada.Matricula} ya inscrito en grupo CRN=${nuevoCrn}`);
+            console.log(
+              `Alumno ${entrada.Matricula} ya inscrito en grupo CRN=${nuevoCrn}`,
+            );
           }
         }
       }
@@ -341,7 +352,7 @@ router.get("/resumen", async (req, res) => {
     `);
 
     res.json({
-      maestros: maestrosQuery.recordset.map(r => r.profesor),
+      maestros: maestrosQuery.recordset.map((r) => r.profesor),
       ecoas: ecoasQuery.recordset,
     });
   } catch (err) {
@@ -349,7 +360,6 @@ router.get("/resumen", async (req, res) => {
     res.status(500).json({ error: "Error al obtener resumen" });
   }
 });
-
 
 // GET /subirArchivo/resumenConConteo
 router.get("/resumenConConteo", async (req, res) => {
@@ -374,7 +384,6 @@ router.get("/resumenConConteo", async (req, res) => {
   const total = recordset.reduce((sum, x) => sum + x.respuestasCount, 0);
   res.json({ ecoas: recordset, total });
 });
-
 
 // GET /subirArchivo/datos/:crn -> Devuelve respuestas para una ECOA específica
 router.get("/datos/:crn", async (req, res) => {

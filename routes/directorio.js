@@ -13,7 +13,7 @@ router.get("/profesores", async (req, res) => {
          matriculaMaestro, 
          nombre + ' ' + apellidoPaterno + ' ' + apellidoMaterno AS nombreCompleto
        FROM profesor;
-      `
+      `,
     );
     res.json({ profesores: result.recordset });
   } catch (err) {
@@ -26,9 +26,7 @@ router.get("/profesores", async (req, res) => {
 router.get("/profesores/count", async (req, res) => {
   try {
     await sql.connect(DBconfig);
-    const result = await sql.query(
-      `SELECT COUNT(*) AS count FROM profesor;`
-    );
+    const result = await sql.query(`SELECT COUNT(*) AS count FROM profesor;`);
     res.json({ count: result.recordset[0].count });
   } catch (err) {
     console.error(err);
@@ -44,7 +42,7 @@ router.get("/directivos/count", async (req, res) => {
       `SELECT COUNT(*) AS count
        FROM usuario u
        JOIN permiso p ON u.idUsuario = p.idUsuario_usuario
-       WHERE p.idRol_rol = 1`
+       WHERE p.idRol_rol = 1`,
     );
     res.json({ count: result.recordset[0].count });
   } catch (err) {
@@ -61,7 +59,7 @@ router.get("/otros/count", async (req, res) => {
       `SELECT COUNT(*) AS count
        FROM usuario u
        JOIN permiso p ON u.idUsuario = p.idUsuario_usuario
-       WHERE p.idRol_rol = 3`
+       WHERE p.idRol_rol = 3`,
     );
     res.json({ count: result.recordset[0].count });
   } catch (err) {
@@ -81,12 +79,12 @@ router.get("/search", async (req, res) => {
     const result = await request.query(
       `SELECT u.idUsuario, u.nombre, u.apellidop, u.apellidom
        FROM usuario u
-       WHERE u.nombre + ' ' + u.apellidop + ' ' + u.apellidom LIKE @term`
+       WHERE u.nombre + ' ' + u.apellidop + ' ' + u.apellidom LIKE @term`,
     );
 
-    const items = result.recordset.map(u => ({
+    const items = result.recordset.map((u) => ({
       id: u.idUsuario,
-      nombre: `${u.nombre} ${u.apellidop} ${u.apellidom}`
+      nombre: `${u.nombre} ${u.apellidop} ${u.apellidom}`,
     }));
 
     res.json({ items });
