@@ -306,7 +306,8 @@ router.post("/subir", async (req, res) => {
 router.get("/resumen", async (req, res) => {
   try {
     await sql.connect(DBconfig);
-    // Lista de maestros
+
+    // 1. Lista de maestros (igual que antes)
     const maestrosQuery = await sql.query(`
       SELECT DISTINCT 
         p.nombre + ' ' + p.apellidoPaterno + ' ' + p.apellidoMaterno AS profesor
@@ -314,16 +315,28 @@ router.get("/resumen", async (req, res) => {
       JOIN grupo g ON r.crn_grupo = g.crn
       JOIN profesor p ON g.matriculaMaestro_profesor = p.matriculaMaestro;
     `);
-    // Lista de ECOAs (crn, grupo, materia, profesor)
+
+    // 2. Lista de ECOAs con agregados
     const ecoasQuery = await sql.query(`
-      SELECT DISTINCT
-        r.crn_grupo AS crn,
-        g.claveGrupo AS grupo,
-        g.clave_materia AS materia,
-        p.nombre + ' ' + p.apellidoPaterno + ' ' + p.apellidoMaterno AS profesor
-      FROM respuesta r
-      JOIN grupo g ON r.crn_grupo = g.crn
-      JOIN profesor p ON g.matriculaMaestro_profesor = p.matriculaMaestro;
+      SELECT 
+        g.crn                    AS crn,
+        g.claveGrupo             AS grupo,
+        g.clave_materia          AS materia,
+        p.nombre + ' ' + p.apellidoPaterno + ' ' + p.apellidoMaterno AS profesor,
+
+        COUNT(DISTINCT r.matriculaAlumno_alumno) AS respuestasCount,
+        CAST(AVG(CAST(r.respuesta AS DECIMAL(5,2))) AS FLOAT)  AS promedioGlobal,
+        COUNT(c.comentario)                                   AS comentariosCount
+      FROM grupo g
+      JOIN profesor p 
+        ON g.matriculaMaestro_profesor = p.matriculaMaestro
+      LEFT JOIN respuesta r 
+        ON r.crn_grupo = g.crn
+      LEFT JOIN comentario c 
+        ON c.crn = g.crn
+      GROUP BY 
+        g.crn, g.claveGrupo, g.clave_materia,
+        p.nombre, p.apellidoPaterno, p.apellidoMaterno;
     `);
 
     res.json({
@@ -335,6 +348,7 @@ router.get("/resumen", async (req, res) => {
     res.status(500).json({ error: "Error al obtener resumen" });
   }
 });
+
 
 // GET /subirArchivo/resumenConConteo
 router.get("/resumenConConteo", async (req, res) => {

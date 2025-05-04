@@ -11,7 +11,6 @@ import gestionComentarios from "../routes/gestionComentario.js"
 
 const app = express();
 const PUERTO = 3000;
-
 // Configuración robusta de CORS
 app.use(
   cors({
