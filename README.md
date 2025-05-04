@@ -2,7 +2,7 @@
 Esta es la implementación de nuestro API para todas las operaciones CRUD realizadas por nuestra
 [plataforma de ECOA's de Highpoint International!](https://github.com/CLA-TC2005B-FJ2025/equipo5-prototipo).
 
-## Método de utilización (utilizando la ruta de departamento como ejemplo)
+## Método de utilización 
 
 ### 1) Inicializar un nuevo codespace (tambien se puede realizar de manera local luego de clonar el repositorio)
 ### 2) Inicializar las dependencias de npm a travez de la terminal
